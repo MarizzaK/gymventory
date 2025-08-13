@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
 import Inventorytable from "./InventoryTable";
-
+import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
+import ProductModal from "./ProductModal";
 const MainPage = () => {
   const [rows, setRows] = useState([]);
+  const [OpenModal, setOpenModal] = useState(false);
   useEffect(() => {
     async function fetchData() {
       handleFetchData();
@@ -22,11 +25,30 @@ const MainPage = () => {
     setRows(dataWithUniqueIds);
   };
 
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "50px" }}>
-      <Header></Header>
-      <Inventorytable rows={rows}></Inventorytable>
-    </div>
+    <>
+      <div style={{ display: "flex", flexDirection: "column", gap: "50px" }}>
+        <Header></Header>
+        <Inventorytable rows={rows}></Inventorytable>
+      </div>
+      <Button
+        onClick={handleOpenModal}
+        variant="contained"
+        style={{
+          width: "56px",
+          height: "56px",
+          position: "fixed",
+          left: "100px",
+        }}
+      >
+        <AddIcon />
+      </Button>
+      <ProductModal open={OpenModal} setOpen={setOpenModal} />
+    </>
   );
 };
 
