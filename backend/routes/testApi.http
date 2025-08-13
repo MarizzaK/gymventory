@@ -9,11 +9,11 @@ POST http://localhost:5001/api/products
 Content-Type: application/json
 
 {
-    "name": "Product 2",
-    "category": "Category 2",
+    "name": "Shorts Omega",
+    "category": "Shorts",
     "quantity": 10,
-    "price": 200,
-    "description": "Product 1 description"
+    "price": 500,
+    "description": "Shorts description"
 }
 
 ### Get product by id
