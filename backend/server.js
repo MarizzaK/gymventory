@@ -13,7 +13,6 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-// ⚡ Rätt sätt med slash
 app.use("/api/products", productRoutes);
 
 const PORT = process.env.PORT || 5000;
