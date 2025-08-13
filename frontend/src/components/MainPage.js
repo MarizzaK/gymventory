@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useEffect, useState } from "react";
 import Header from "./Header";
 import Inventorytable from "./InventoryTable";
@@ -7,6 +8,7 @@ import ProductModal from "./ProductModal";
 const MainPage = () => {
   const [rows, setRows] = useState([]);
   const [OpenModal, setOpenModal] = useState(false);
+  const [editProductId, setEditProductId] = React.useState(null);
   useEffect(() => {
     async function fetchData() {
       handleFetchData();
@@ -33,7 +35,10 @@ const MainPage = () => {
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: "50px" }}>
         <Header></Header>
-        <Inventorytable rows={rows}></Inventorytable>
+        <Inventorytable
+          rows={rows}
+          setEditProductId={setEditProductId}
+        ></Inventorytable>
       </div>
       <Button
         onClick={handleOpenModal}
@@ -47,7 +52,11 @@ const MainPage = () => {
       >
         <AddIcon />
       </Button>
-      <ProductModal open={OpenModal} setOpen={setOpenModal} />
+      <ProductModal
+        open={OpenModal}
+        setOpen={setOpenModal}
+        editProductId={editProductId}
+      />
     </>
   );
 };
