@@ -22,6 +22,7 @@ const style = {
 
 export default function ProductModal({ open, setOpen, editProductId }) {
   const handleClose = () => setOpen(false);
+
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -29,8 +30,8 @@ export default function ProductModal({ open, setOpen, editProductId }) {
     price: "",
     description: "",
   });
-
   const [editing, setEditing] = useState(false);
+  const [image, setImage] = useState(null);
 
   React.useEffect(() => {
     if (editProductId) {
@@ -55,6 +56,21 @@ export default function ProductModal({ open, setOpen, editProductId }) {
     }));
   };
 
+  const handleFileChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setImage(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { name, category, quantity, price, description } = formData;
@@ -64,42 +80,36 @@ export default function ProductModal({ open, setOpen, editProductId }) {
       return;
     }
 
-    if (editing) {
-      const response = await fetch(
-        `http://localhost:5001/api/products/${editProductId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
+    const data = new FormData();
+    data.append("name", name);
+    data.append("category", category);
+    data.append("quantity", quantity);
+    data.append("price", price);
+    data.append("description", description);
+    if (image) data.append("image", image);
+
+    const url = editing
+      ? `http://localhost:5001/api/products/${editProductId}`
+      : "http://localhost:5001/api/products";
+
+    const method = editing ? "PUT" : "POST";
+
+    const response = await fetch(url, {
+      method: method,
+      body: data,
+    });
+
+    if (response.ok) {
+      alert(
+        editing ? "Product updated successfully" : "Product added successfully"
       );
-
-      if (response.ok) {
-        alert("Product updated succesfully");
-        window.location.reload();
-        setOpen(false);
-      } else {
-        alert("Something went wrong");
-      }
+      window.location.reload();
+      setOpen(false);
     } else {
-      const response = await fetch("http://localhost:5001/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        alert("Product added succesfully");
-        window.location.reload();
-      } else {
-        alert("Something went wrong");
-      }
+      alert("Something went wrong");
     }
   };
+
   return (
     <div>
       <Modal
@@ -110,16 +120,13 @@ export default function ProductModal({ open, setOpen, editProductId }) {
         closeAfterTransition
         slots={{ backdrop: Backdrop }}
         slotProps={{
-          backdrop: {
-            timeout: 500,
-          },
+          backdrop: { timeout: 500 },
         }}
       >
         <Fade in={open}>
           <Box sx={style}>
-            <Typography id="transition-moddl-title" variant="h6" component="h2">
-              {" "}
-              Add new Product
+            <Typography id="transition-modal-title" variant="h6" component="h2">
+              {editing ? "Edit Product" : "Add New Product"}
             </Typography>
             <form onSubmit={handleSubmit}>
               <TextField
@@ -130,7 +137,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
                 fullWidth
                 required
                 margin="normal"
-              ></TextField>
+              />
               <TextField
                 label="Category"
                 name="category"
@@ -139,7 +146,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
                 fullWidth
                 required
                 margin="normal"
-              ></TextField>
+              />
               <TextField
                 label="Quantity"
                 name="quantity"
@@ -148,7 +155,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
                 fullWidth
                 required
                 margin="normal"
-              ></TextField>
+              />
               <TextField
                 label="Price"
                 name="price"
@@ -157,7 +164,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
                 fullWidth
                 required
                 margin="normal"
-              ></TextField>
+              />
               <TextField
                 label="Description"
                 name="description"
@@ -166,14 +173,60 @@ export default function ProductModal({ open, setOpen, editProductId }) {
                 fullWidth
                 required
                 margin="normal"
-              ></TextField>
+              />
+
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                style={{
+                  border: "2px dashed gray",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  textAlign: "center",
+                  marginTop: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                {image ? (
+                  <p>{image.name}</p>
+                ) : (
+                  <p>Drag & Drop an image here or click the button below</p>
+                )}
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  name="image"
+                  id="fileInput"
+                />
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => document.getElementById("fileInput").click()}
+                  sx={{
+                    mt: 2,
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    paddingX: 3,
+                    paddingY: 1,
+                    boxShadow: "0px 3px 6px rgba(0,0,0,0.2)",
+                  }}
+                >
+                  Choose File
+                </Button>
+              </div>
+
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
                 fullWidth
+                sx={{ mt: 2 }}
               >
-                Add
+                {editing ? "Update" : "Add"}
               </Button>
             </form>
           </Box>
