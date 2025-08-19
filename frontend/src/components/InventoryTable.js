@@ -2,7 +2,6 @@ import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
-import { flex } from "@mui/system";
 
 const paginationModel = { page: 0, pageSize: 5 };
 

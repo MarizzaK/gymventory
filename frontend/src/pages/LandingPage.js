@@ -1,30 +1,21 @@
 import React, { useState, useEffect } from "react";
 import {
-  AppBar,
-  Toolbar,
-  Typography,
   Box,
   Card,
   CardContent,
   CardMedia,
   IconButton,
-  Menu,
-  MenuItem,
+  Typography,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SearchIcon from "@mui/icons-material/Search";
+import Navbar from "../components/Navbar";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import heroImg from "../img/hero-img.png";
 import heroImgMobile from "../img/heroImg-mobile.png";
 
-export default function LandingPage() {
+export default function LandingPage({ user, setUser }) {
   const [products, setProducts] = useState([]);
-  const [womensAnchor, setWomensAnchor] = useState(null);
-  const [mensAnchor, setMensAnchor] = useState(null);
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -47,82 +38,13 @@ export default function LandingPage() {
 
   return (
     <div>
-      <AppBar position="static" color="default" sx={{ boxShadow: 1 }}>
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <Box
-              onMouseEnter={(e) => setWomensAnchor(e.currentTarget)}
-              onMouseLeave={() => setWomensAnchor(null)}
-              sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
-            >
-              <Typography>WOMENS</Typography>
-              <ArrowDropDownIcon />
-            </Box>
-            <Menu
-              anchorEl={womensAnchor}
-              open={Boolean(womensAnchor)}
-              onClose={() => setWomensAnchor(null)}
-              MenuListProps={{ onMouseLeave: () => setWomensAnchor(null) }}
-            >
-              <MenuItem>Tops</MenuItem>
-              <MenuItem>Bottoms</MenuItem>
-              <MenuItem>Accessories</MenuItem>
-            </Menu>
+      <Navbar user={user} setUser={setUser} />
 
-            <Box
-              onMouseEnter={(e) => setMensAnchor(e.currentTarget)}
-              onMouseLeave={() => setMensAnchor(null)}
-              sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
-            >
-              <Typography>MENS</Typography>
-              <ArrowDropDownIcon />
-            </Box>
-            <Menu
-              anchorEl={mensAnchor}
-              open={Boolean(mensAnchor)}
-              onClose={() => setMensAnchor(null)}
-              MenuListProps={{ onMouseLeave: () => setMensAnchor(null) }}
-            >
-              <MenuItem>Tops</MenuItem>
-              <MenuItem>Bottoms</MenuItem>
-              <MenuItem>Accessories</MenuItem>
-            </Menu>
-          </Box>
-
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-            IGNITE
-          </Typography>
-
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <IconButton>
-              <AccountCircleIcon />
-            </IconButton>
-            <IconButton>
-              <SearchIcon />
-            </IconButton>
-            <IconButton>
-              <ShoppingBagIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
         <img
           src={isMobile ? heroImgMobile : heroImg}
           alt="Hero"
-          style={{
-            width: "100%",
-            height: "auto",
-            display: "block",
-            objectFit: "contain",
-          }}
+          style={{ width: "100%", height: "auto", display: "block" }}
         />
       </Box>
 
@@ -130,7 +52,6 @@ export default function LandingPage() {
         {Array.from({ length: Math.ceil(products.length / 4) }).map(
           (_, rowIndex) => {
             const rowProducts = products.slice(rowIndex * 4, rowIndex * 4 + 4);
-
             return (
               <Box
                 key={rowIndex}
