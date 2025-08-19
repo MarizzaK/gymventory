@@ -23,8 +23,12 @@ export default function Header() {
     setDrawerOpen(false);
   };
 
+  const handleDashboard = () => {
+    navigate("/");
+    setDrawerOpen(false);
+  };
+
   const handleLogout = () => {
-    // Lägg här logik för logout senare
     setDrawerOpen(false);
   };
 
@@ -32,7 +36,6 @@ export default function Header() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar variant="dense">
-          {/* Titel */}
           <Typography
             variant="h6"
             color="inherit"
@@ -54,12 +57,16 @@ export default function Header() {
       </AppBar>
 
       <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-        <Box
-          sx={{ width: 250, p: 2 }}
-          role="presentation"
-          onClick={toggleDrawer(false)}
-        >
+        <Box sx={{ width: 250, p: 2 }}>
           <Stack spacing={2}>
+            <Button
+              variant="contained"
+              color="secondary"
+              fullWidth
+              onClick={handleDashboard}
+            >
+              Dashboard
+            </Button>
             <Button
               variant="contained"
               color="primary"

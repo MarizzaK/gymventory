@@ -46,7 +46,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
       }
       fetchProducts();
     }
-  }, [editProductId]);
+  }, [editProductId, setOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
