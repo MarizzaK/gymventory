@@ -16,6 +16,9 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
 
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+
   // --- Init cart baserat på guest/user ---
   useEffect(() => {
     const initCart = async () => {
@@ -53,6 +56,21 @@ function App() {
     };
 
     initCart();
+  }, []);
+
+  // --- Hämta produkter (för sök) ---
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("http://localhost:5001/api/products");
+        const data = await res.json();
+        setProducts(data);
+        setFilteredProducts(data); // för sök
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      }
+    }
+    fetchProducts();
   }, []);
 
   // --- Hantera login (JWT eller Google) ---
@@ -139,11 +157,19 @@ function App() {
         addToCart={addToCart}
         removeFromCart={removeFromCart}
         handleLogout={handleLogout}
+        products={products}
+        setFilteredProducts={setFilteredProducts}
       />
       <Routes>
         <Route
           path="/"
-          element={<LandingPage user={user} addToCart={addToCart} />}
+          element={
+            <LandingPage
+              user={user}
+              addToCart={addToCart}
+              products={filteredProducts}
+            />
+          }
         />
         <Route
           path="/product/:id"

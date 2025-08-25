@@ -11,33 +11,20 @@ import {
   Modal,
   Button,
 } from "@mui/material";
-
+import { useNavigate, useLocation } from "react-router-dom";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import heroImg from "../img/hero-img.png";
 import heroImgMobile from "../img/heroImg-mobile.png";
-import { useNavigate } from "react-router-dom";
 
-export default function LandingPage({ addToCart }) {
-  const [products, setProducts] = useState([]);
+export default function LandingPage({ addToCart, products }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const response = await fetch("http://localhost:5001/api/products");
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      }
-    }
-    fetchProducts();
-  }, []);
+  const [filteredProducts, setFilteredProducts] = useState(products || []);
 
   const handleOpenModal = (product) => {
     setSelectedProduct(product);
@@ -54,8 +41,23 @@ export default function LandingPage({ addToCart }) {
     handleCloseModal();
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const category = params.get("category");
+
+    if (category && products) {
+      const filtered = products.filter(
+        (p) => p.category.toLowerCase() === category.toLowerCase()
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(products || []);
+    }
+  }, [location.search, products]);
+
   return (
     <div>
+      {/* Hero */}
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
         <img
           src={isMobile ? heroImgMobile : heroImg}
@@ -65,9 +67,15 @@ export default function LandingPage({ addToCart }) {
       </Box>
 
       <Box sx={{ padding: 4 }}>
-        {Array.from({ length: Math.ceil(products.length / 4) }).map(
+        {filteredProducts.length === 0 && (
+          <Typography variant="h6">Inga produkter hittades</Typography>
+        )}
+        {Array.from({ length: Math.ceil(filteredProducts.length / 4) }).map(
           (_, rowIndex) => {
-            const rowProducts = products.slice(rowIndex * 4, rowIndex * 4 + 4);
+            const rowProducts = filteredProducts.slice(
+              rowIndex * 4,
+              rowIndex * 4 + 4
+            );
             return (
               <Box
                 key={rowIndex}
@@ -128,6 +136,7 @@ export default function LandingPage({ addToCart }) {
         )}
       </Box>
 
+      {/* Modal för storlek */}
       <Modal open={openModal} onClose={handleCloseModal}>
         <Box
           sx={{

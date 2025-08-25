@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   AppBar,
   Toolbar,
@@ -12,14 +12,16 @@ import {
   ListItem,
   ListItemText,
   Collapse,
+  InputBase,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SearchIcon from "@mui/icons-material/Search";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import SearchIcon from "@mui/icons-material/Search";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import CartCheckoutForm from "./CartCheckoutForm";
@@ -35,12 +37,19 @@ export default function Navbar({
   addToCart,
   removeFromCart,
   handleLogout,
+  products,
+  setFilteredProducts,
 }) {
-  const [womensAnchor, setWomensAnchor] = useState(null);
-  const [mensAnchor, setMensAnchor] = useState(null);
+  const [womensOpen, setWomensOpen] = useState(false);
+  const [mensOpen, setMensOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  const womensRef = useRef(null);
+  const mensRef = useRef(null);
+
   const navigate = useNavigate();
 
   const handleAccountClick = () => {
@@ -48,48 +57,131 @@ export default function Navbar({
     else navigate("/customer-login");
   };
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
+
+    if (products && setFilteredProducts) {
+      const filtered = products.filter((p) =>
+        p.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  };
+
+  const handleCategoryClick = (category) => {
+    if (products && setFilteredProducts) {
+      const filtered = products.filter(
+        (p) => p.category.toLowerCase() === category.toLowerCase()
+      );
+      setFilteredProducts(filtered);
+    }
+
+    navigate(`/products?category=${category.toLowerCase()}`);
+
+    setWomensOpen(false);
+    setMensOpen(false);
+  };
+
   return (
     <>
       <AppBar position="static" color="default" sx={{ boxShadow: 1 }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", gap: 2 }}>
+            {/* WOMEN */}
             <Box
-              onMouseEnter={(e) => setWomensAnchor(e.currentTarget)}
-              onMouseLeave={() => setWomensAnchor(null)}
-              sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+              onMouseEnter={() => {
+                setWomensOpen(true);
+                setMensOpen(false);
+              }}
+              onMouseLeave={() => setWomensOpen(false)}
+              sx={{ display: "inline-block" }}
             >
-              <Typography>WOMEN</Typography>
-              <ArrowDropDownIcon />
+              <Box
+                ref={womensRef}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <Typography>WOMEN</Typography>
+                <ArrowDropDownIcon />
+              </Box>
+              <Menu
+                anchorEl={womensRef.current}
+                open={womensOpen}
+                onClose={() => setWomensOpen(false)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                disableAutoFocusItem
+              >
+                <MenuItem disabled sx={{ fontWeight: "bold" }}>
+                  SHOP BY CATEGORY
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("sports-bras")}>
+                  Sports Bras
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("tops")}>
+                  Tops
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("jackets")}>
+                  Jackets
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("shorts")}>
+                  Shorts
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("leggings")}>
+                  Leggings
+                </MenuItem>
+              </Menu>
             </Box>
-            <Menu
-              anchorEl={womensAnchor}
-              open={Boolean(womensAnchor)}
-              onClose={() => setWomensAnchor(null)}
-              MenuListProps={{ onMouseLeave: () => setWomensAnchor(null) }}
-            >
-              <MenuItem>Tops</MenuItem>
-              <MenuItem>Bottoms</MenuItem>
-              <MenuItem>Accessories</MenuItem>
-            </Menu>
 
+            {/* MEN */}
             <Box
-              onMouseEnter={(e) => setMensAnchor(e.currentTarget)}
-              onMouseLeave={() => setMensAnchor(null)}
-              sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+              onMouseEnter={() => {
+                setMensOpen(true);
+                setWomensOpen(false);
+              }}
+              onMouseLeave={() => setMensOpen(false)}
+              sx={{ display: "inline-block" }}
             >
-              <Typography>MEN</Typography>
-              <ArrowDropDownIcon />
+              <Box
+                ref={mensRef}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+              >
+                <Typography>MEN</Typography>
+                <ArrowDropDownIcon />
+              </Box>
+              <Menu
+                anchorEl={mensRef.current}
+                open={mensOpen}
+                onClose={() => setMensOpen(false)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                disableAutoFocusItem
+              >
+                <MenuItem disabled sx={{ fontWeight: "bold" }}>
+                  SHOP BY CATEGORY
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("tops")}>
+                  Tops
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("jackets")}>
+                  Jackets
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("shorts")}>
+                  Shorts
+                </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("leggings")}>
+                  Leggings
+                </MenuItem>
+              </Menu>
             </Box>
-            <Menu
-              anchorEl={mensAnchor}
-              open={Boolean(mensAnchor)}
-              onClose={() => setMensAnchor(null)}
-              MenuListProps={{ onMouseLeave: () => setMensAnchor(null) }}
-            >
-              <MenuItem>Tops</MenuItem>
-              <MenuItem>Bottoms</MenuItem>
-              <MenuItem>Accessories</MenuItem>
-            </Menu>
           </Box>
 
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
@@ -101,7 +193,7 @@ export default function Navbar({
               <AccountCircleIcon />
             </IconButton>
             <IconButton>
-              <SearchIcon />
+              <FavoriteIcon />
             </IconButton>
             <IconButton onClick={() => setCartOpen(true)}>
               <ShoppingBagIcon />
@@ -120,9 +212,31 @@ export default function Navbar({
             </IconButton>
           </Box>
         </Toolbar>
+
+        <Box sx={{ width: "100%", p: 1, backgroundColor: "#f5f5f5" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              border: "1px solid #ccc",
+              borderRadius: 2,
+              px: 2,
+              mx: "auto",
+              width: "90%",
+              backgroundColor: "#fff",
+            }}
+          >
+            <SearchIcon sx={{ color: "#888", mr: 1 }} />
+            <InputBase
+              placeholder="Search products"
+              fullWidth
+              value={searchText}
+              onChange={handleSearchChange}
+            />
+          </Box>
+        </Box>
       </AppBar>
 
-      {/* Drawer */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -134,14 +248,12 @@ export default function Navbar({
               <ListItemText primary={`Hello, ${user?.name || "User"}`} />
             </ListItem>
 
-            {/* Profile med dropdown */}
             <ListItem button onClick={() => setProfileOpen(!profileOpen)}>
               <ListItemText primary="Profile" />
               {profileOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
             <Collapse in={profileOpen} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
-                {/* Orderhistorik */}
                 <ListItem
                   button
                   sx={{ pl: 4 }}
@@ -152,8 +264,6 @@ export default function Navbar({
                 >
                   <ListItemText primary="Orderhistorik" />
                 </ListItem>
-
-                {/* My Info */}
                 <ListItem
                   button
                   sx={{ pl: 4 }}
@@ -167,7 +277,6 @@ export default function Navbar({
               </List>
             </Collapse>
 
-            {/* Logout */}
             <ListItem
               button
               onClick={() => {
@@ -182,7 +291,6 @@ export default function Navbar({
         </Box>
       </Drawer>
 
-      {/* Cart Drawer */}
       <Drawer anchor="right" open={cartOpen} onClose={() => setCartOpen(false)}>
         <Box sx={{ width: 400 }}>
           <Elements stripe={stripePromise}>
