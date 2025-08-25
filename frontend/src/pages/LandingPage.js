@@ -8,16 +8,23 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
+  Modal,
+  Button,
 } from "@mui/material";
-import Navbar from "../components/Navbar";
+
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import heroImg from "../img/hero-img.png";
 import heroImgMobile from "../img/heroImg-mobile.png";
+import { useNavigate } from "react-router-dom";
 
-export default function LandingPage({ user, setUser }) {
+export default function LandingPage({ addToCart }) {
   const [products, setProducts] = useState([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -32,14 +39,23 @@ export default function LandingPage({ user, setUser }) {
     fetchProducts();
   }, []);
 
-  const handleAddToCart = (product) => {
-    console.log("Add to cart:", product);
+  const handleOpenModal = (product) => {
+    setSelectedProduct(product);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedProduct(null);
+  };
+
+  const handleSelectSize = (size) => {
+    addToCart(selectedProduct, size);
+    handleCloseModal();
   };
 
   return (
     <div>
-      <Navbar user={user} setUser={setUser} />
-
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
         <img
           src={isMobile ? heroImgMobile : heroImg}
@@ -76,7 +92,10 @@ export default function LandingPage({ user, setUser }) {
                       width: "280px",
                       flex: "0 0 auto",
                       scrollSnapAlign: "start",
+                      cursor: "pointer",
+                      "&:hover": { boxShadow: 6 },
                     }}
+                    onClick={() => navigate(`/product/${product._id}`)}
                   >
                     <CardMedia
                       component="img"
@@ -92,10 +111,11 @@ export default function LandingPage({ user, setUser }) {
                     </CardContent>
                     <Box
                       sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <IconButton
                         color="primary"
-                        onClick={() => handleAddToCart(product)}
+                        onClick={() => handleOpenModal(product)}
                       >
                         <ShoppingBagIcon />
                       </IconButton>
@@ -107,6 +127,34 @@ export default function LandingPage({ user, setUser }) {
           }
         )}
       </Box>
+
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            background: "white",
+            p: 3,
+            borderRadius: 2,
+            width: 300,
+            mx: "auto",
+            mt: "20%",
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Välj storlek
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {["XXS", "XS", "S", "M", "L", "XL"].map((s) => (
+              <Button
+                key={s}
+                variant="outlined"
+                onClick={() => handleSelectSize(s)}
+              >
+                {s}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 }

@@ -24,6 +24,22 @@ const createToken = (user) => {
 };
 
 // ------------------------
+// Auth middleware
+// ------------------------
+const authMiddleware = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+// ------------------------
 // Google login
 // ------------------------
 router.post("/google-login", async (req, res) => {
@@ -36,16 +52,15 @@ router.post("/google-login", async (req, res) => {
     const payload = ticket.getPayload();
 
     let user = await Customer.findOne({ email: payload.email });
-
     if (!user) {
       user = await Customer.create({
         name: payload.name,
         email: payload.email,
+        cart: [],
       });
     }
 
     const jwtToken = createToken(user);
-
     res.json({ token: jwtToken, user });
   } catch (err) {
     console.error("Google login error:", err);
@@ -54,7 +69,7 @@ router.post("/google-login", async (req, res) => {
 });
 
 // ------------------------
-// Skicka magic code
+// Magic code
 // ------------------------
 router.post("/send-code", async (req, res) => {
   try {
@@ -63,16 +78,18 @@ router.post("/send-code", async (req, res) => {
 
     let user = await Customer.findOne({ email });
     if (!user) {
-      user = await Customer.create({ email, name: email.split("@")[0] });
+      user = await Customer.create({
+        email,
+        name: email.split("@")[0],
+        cart: [],
+      });
     }
 
-    // skapa 6-siffrig kod
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     user.magicCode = code;
-    user.codeExpiresAt = Date.now() + 10 * 60 * 1000; // 10 min (rätt fält från schema)
+    user.codeExpiresAt = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    // Skicka mail
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -87,9 +104,6 @@ router.post("/send-code", async (req, res) => {
   }
 });
 
-// ------------------------
-// Verifiera magic code
-// ------------------------
 router.post("/verify-code", async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -99,12 +113,8 @@ router.post("/verify-code", async (req, res) => {
       return res.status(400).json({ message: "Invalid code" });
     }
 
-    // Om användaren inte har ett namn, sätt default
-    if (!user.name) {
-      user.name = email.split("@")[0];
-    }
+    if (!user.name) user.name = email.split("@")[0];
 
-    // Rensa koden efter användning
     user.magicCode = null;
     user.codeExpiresAt = null;
     await user.save();
@@ -114,6 +124,64 @@ router.post("/verify-code", async (req, res) => {
   } catch (err) {
     console.error("Verify code error:", err);
     res.status(500).json({ message: "Failed to verify code" });
+  }
+});
+
+// ------------------------
+// Cart endpoints
+// ------------------------
+router.get("/cart", authMiddleware, async (req, res) => {
+  try {
+    const user = await Customer.findById(req.user.id);
+    res.json(user.cart || []);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load cart" });
+  }
+});
+
+router.post("/cart", authMiddleware, async (req, res) => {
+  try {
+    const { cart } = req.body;
+    if (!Array.isArray(cart))
+      return res.status(400).json({ message: "Cart must be an array" });
+
+    const user = await Customer.findById(req.user.id);
+    user.cart = cart;
+    await user.save();
+    res.json(user.cart);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update cart" });
+  }
+});
+
+// ------------------------
+// Profile endpoints
+// ------------------------
+router.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    const user = await Customer.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load profile" });
+  }
+});
+
+router.put("/profile", authMiddleware, async (req, res) => {
+  try {
+    const { name, email, address } = req.body;
+    const user = await Customer.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.address = address || user.address;
+
+    await user.save();
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to update profile" });
   }
 });
 

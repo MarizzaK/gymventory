@@ -13,12 +13,13 @@ import axios from "axios";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
-export default function CustomerLoginPage({ user, setUser }) {
+export default function CustomerLoginPage({ user, handleLogin }) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false); // ny state
+  const [codeSent, setCodeSent] = useState(false);
   const navigate = useNavigate();
 
+  // --- Google login ---
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const response = await axios.post(
@@ -26,8 +27,8 @@ export default function CustomerLoginPage({ user, setUser }) {
         { token: credentialResponse.credential }
       );
       const { token, user } = response.data;
-      localStorage.setItem("jwtToken", token);
-      setUser(user);
+
+      handleLogin(user, token);
       navigate("/");
     } catch (error) {
       console.error("Google login failed:", error);
@@ -40,6 +41,7 @@ export default function CustomerLoginPage({ user, setUser }) {
     alert("Google login failed. Please try again.");
   };
 
+  // --- Magic code login ---
   const handleSendCode = async () => {
     if (!email.trim()) return alert("Please enter your email");
     try {
@@ -57,18 +59,14 @@ export default function CustomerLoginPage({ user, setUser }) {
   const handleVerifyCode = async () => {
     if (!code.trim()) return alert("Please enter the code");
 
-    const payload = { email: email.trim(), code: code.trim() };
-    console.log("Verifying code with payload:", payload); // debug
-
     try {
       const response = await axios.post(
         "http://localhost:5001/api/customers/verify-code",
-        payload
+        { email: email.trim(), code: code.trim() }
       );
       const { token, user } = response.data;
-      console.log("Verification successful:", response.data); // debug
-      localStorage.setItem("jwtToken", token);
-      setUser(user);
+
+      handleLogin(user, token);
       navigate("/");
     } catch (error) {
       console.error("Verify code failed:", error.response || error);
