@@ -98,6 +98,8 @@ export default function Navbar({
         });
       }
       setFilteredProducts(filtered);
+
+      navigate("/", { replace: false });
     }
 
     // Stäng bara dropdown om kategori valdes
