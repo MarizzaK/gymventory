@@ -1,3 +1,4 @@
+// ProductModal.js
 import * as React from "react";
 import { useState, useEffect } from "react";
 import Backdrop from "@mui/material/Backdrop";
@@ -24,7 +25,14 @@ const style = {
   p: 4,
 };
 
-export default function ProductModal({ open, setOpen, editProductId }) {
+export default function ProductModal({
+  open,
+  setOpen,
+  editProductId,
+  setEditProductId,
+  rows,
+  setRows,
+}) {
   const handleClose = () => setOpen(false);
 
   const [formData, setFormData] = useState({
@@ -39,11 +47,23 @@ export default function ProductModal({ open, setOpen, editProductId }) {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    if (editProductId) {
-      async function fetchProduct() {
+    if (!editProductId) return;
+
+    async function fetchProduct() {
+      try {
+        const token = localStorage.getItem("jwtToken");
         const response = await fetch(
-          `http://localhost:5001/api/products/${editProductId}`
+          `http://localhost:5001/api/products/${editProductId}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
         );
+
+        if (!response.ok) {
+          alert("Något gick fel vid hämtning av produkten.");
+          return;
+        }
+
         const data = await response.json();
         setFormData({
           name: data.name || "",
@@ -53,20 +73,22 @@ export default function ProductModal({ open, setOpen, editProductId }) {
           price: data.price || "",
           description: data.description || "",
         });
+
         setImage(null);
         setOpen(true);
         setEditing(true);
+      } catch (error) {
+        console.error(error);
+        alert("Ett fel inträffade vid hämtning av produkten.");
       }
-      fetchProduct();
     }
+
+    fetchProduct();
   }, [editProductId, setOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => setImage(e.target.files[0]);
@@ -82,34 +104,59 @@ export default function ProductModal({ open, setOpen, editProductId }) {
     const { name, category, gender, quantity, price, description } = formData;
 
     if (!name || !category || !gender || !quantity || !price || !description) {
-      alert("Please fill all fields");
+      alert("Fyll i alla fält");
       return;
     }
 
-    const data = new FormData();
-    data.append("name", name);
-    data.append("category", category);
-    data.append("gender", gender);
-    data.append("quantity", quantity);
-    data.append("price", price);
-    data.append("description", description);
-    if (image) data.append("image", image);
+    const dataToSend = new FormData();
+    dataToSend.append("name", name);
+    dataToSend.append("category", category);
+    dataToSend.append("gender", gender);
+    dataToSend.append("quantity", quantity);
+    dataToSend.append("price", price);
+    dataToSend.append("description", description);
+    if (image) dataToSend.append("image", image);
 
+    const token = localStorage.getItem("jwtToken");
     const url = editing
       ? `http://localhost:5001/api/products/${editProductId}`
       : "http://localhost:5001/api/products";
     const method = editing ? "PUT" : "POST";
 
-    const response = await fetch(url, { method, body: data });
+    const response = await fetch(url, {
+      method,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: dataToSend,
+    });
 
     if (response.ok) {
-      alert(
-        editing ? "Product updated successfully" : "Product added successfully"
-      );
-      window.location.reload();
+      const updatedProduct = await response.json();
+
+      if (setRows) {
+        setRows((prevRows) =>
+          editing
+            ? prevRows.map((r) =>
+                r._id === editProductId ? updatedProduct : r
+              )
+            : [...prevRows, updatedProduct]
+        );
+      }
+
+      alert(editing ? "Produkten uppdaterades!" : "Produkten lades till!");
       setOpen(false);
+      if (setEditProductId) setEditProductId(null);
+      setEditing(false);
+      setFormData({
+        name: "",
+        category: "",
+        gender: "",
+        quantity: "",
+        price: "",
+        description: "",
+      });
+      setImage(null);
     } else {
-      alert("Something went wrong");
+      alert("Något gick fel. Försök igen.");
     }
   };
 
@@ -124,11 +171,11 @@ export default function ProductModal({ open, setOpen, editProductId }) {
       <Fade in={open}>
         <Box sx={style}>
           <Typography variant="h6" component="h2" gutterBottom>
-            {editing ? "Edit Product" : "Add New Product"}
+            {editing ? "Redigera produkt" : "Lägg till ny produkt"}
           </Typography>
           <form onSubmit={handleSubmit}>
             <TextField
-              label="Name"
+              label="Namn"
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -137,7 +184,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
               margin="normal"
             />
             <TextField
-              label="Category"
+              label="Kategori"
               name="category"
               value={formData.category}
               onChange={handleChange}
@@ -145,9 +192,8 @@ export default function ProductModal({ open, setOpen, editProductId }) {
               required
               margin="normal"
             />
-
             <FormControl fullWidth margin="normal">
-              <InputLabel id="gender-label">Gender</InputLabel>
+              <InputLabel id="gender-label">Kön</InputLabel>
               <Select
                 labelId="gender-label"
                 name="gender"
@@ -155,13 +201,12 @@ export default function ProductModal({ open, setOpen, editProductId }) {
                 onChange={handleChange}
                 required
               >
-                <MenuItem value="women">Women</MenuItem>
-                <MenuItem value="men">Men</MenuItem>
+                <MenuItem value="women">Kvinnor</MenuItem>
+                <MenuItem value="men">Män</MenuItem>
               </Select>
             </FormControl>
-
             <TextField
-              label="Quantity"
+              label="Antal"
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
@@ -170,7 +215,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
               margin="normal"
             />
             <TextField
-              label="Price"
+              label="Pris"
               name="price"
               value={formData.price}
               onChange={handleChange}
@@ -179,7 +224,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
               margin="normal"
             />
             <TextField
-              label="Description"
+              label="Beskrivning"
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -187,7 +232,6 @@ export default function ProductModal({ open, setOpen, editProductId }) {
               required
               margin="normal"
             />
-
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -203,7 +247,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
               {image ? (
                 <p>{image.name}</p>
               ) : (
-                <p>Drag & Drop an image here or click the button below</p>
+                <p>Dra & släpp en bild här eller klicka på knappen</p>
               )}
               <input
                 type="file"
@@ -225,10 +269,9 @@ export default function ProductModal({ open, setOpen, editProductId }) {
                   py: 1,
                 }}
               >
-                Choose File
+                Välj fil
               </Button>
             </div>
-
             <Button
               type="submit"
               variant="contained"
@@ -236,7 +279,7 @@ export default function ProductModal({ open, setOpen, editProductId }) {
               fullWidth
               sx={{ mt: 2 }}
             >
-              {editing ? "Update" : "Add"}
+              {editing ? "Uppdatera" : "Lägg till"}
             </Button>
           </form>
         </Box>

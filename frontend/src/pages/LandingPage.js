@@ -15,6 +15,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import heroImg from "../img/hero-img.png";
 import heroImgMobile from "../img/heroImg-mobile.png";
+import featureImg from "../img/feature-img.png";
+import Footer from "../components/Footer";
 
 export default function LandingPage({ addToCart, products }) {
   const theme = useTheme();
@@ -64,7 +66,6 @@ export default function LandingPage({ addToCart, products }) {
 
   return (
     <div>
-      {/* Hero */}
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
         <img
           src={isMobile ? heroImgMobile : heroImg}
@@ -84,60 +85,86 @@ export default function LandingPage({ addToCart, products }) {
               rowIndex * 4 + 4
             );
             return (
-              <Box
-                key={rowIndex}
-                sx={{
-                  display: "flex",
-                  justifyContent:
-                    rowProducts.length === 4 && window.innerWidth >= 1200
-                      ? "center"
-                      : "flex-start",
-                  gap: 3,
-                  overflowX: "auto",
-                  scrollSnapType: "x mandatory",
-                  mb: 3,
-                  "&::-webkit-scrollbar": { display: "none" },
-                }}
-              >
-                {rowProducts.map((product) => (
-                  <Card
-                    key={product._id}
-                    sx={{
-                      borderRadius: 3,
-                      width: "280px",
-                      flex: "0 0 auto",
-                      scrollSnapAlign: "start",
-                      cursor: "pointer",
-                      "&:hover": { boxShadow: 6 },
-                    }}
-                    onClick={() => navigate(`/product/${product._id}`)}
-                  >
-                    <CardMedia
-                      component="img"
-                      height="300"
-                      image={product.image}
-                      alt={product.name}
-                    />
-                    <CardContent>
-                      <Typography variant="h6">{product.name}</Typography>
-                      <Typography variant="subtitle1">
-                        ${product.price.toFixed(2)}
-                      </Typography>
-                    </CardContent>
-                    <Box
-                      sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}
-                      onClick={(e) => e.stopPropagation()}
+              <React.Fragment key={rowIndex}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent:
+                      rowProducts.length === 4 && window.innerWidth >= 1200
+                        ? "center"
+                        : "flex-start",
+                    gap: 3,
+                    overflowX: "auto",
+                    scrollSnapType: "x mandatory",
+                    mb: 3,
+                    "&::-webkit-scrollbar": { display: "none" },
+                  }}
+                >
+                  {rowProducts.map((product) => (
+                    <Card
+                      key={product._id}
+                      sx={{
+                        borderRadius: 3,
+                        width: "280px",
+                        flex: "0 0 auto",
+                        scrollSnapAlign: "start",
+                        cursor: "pointer",
+                        "&:hover": { boxShadow: 6 },
+                      }}
+                      onClick={() => navigate(`/product/${product._id}`)}
                     >
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleOpenModal(product)}
+                      <CardMedia
+                        component="img"
+                        height="300"
+                        image={product.image}
+                        alt={product.name}
+                      />
+                      <CardContent>
+                        <Typography variant="h6">{product.name}</Typography>
+                        <Typography variant="subtitle1">
+                          ${product.price.toFixed(2)}
+                        </Typography>
+                      </CardContent>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          p: 1,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <ShoppingBagIcon />
-                      </IconButton>
-                    </Box>
-                  </Card>
-                ))}
-              </Box>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenModal(product)}
+                        >
+                          <ShoppingBagIcon />
+                        </IconButton>
+                      </Box>
+                    </Card>
+                  ))}
+                </Box>
+
+                {rowIndex === 3 && (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      mb: 4,
+                    }}
+                  >
+                    <img
+                      src={isMobile ? featureImg : featureImg}
+                      alt="Feature"
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        display: "block",
+                      }}
+                    />
+                  </Box>
+                )}
+              </React.Fragment>
             );
           }
         )}
@@ -170,6 +197,7 @@ export default function LandingPage({ addToCart, products }) {
           </Box>
         </Box>
       </Modal>
+      <Footer />
     </div>
   );
 }

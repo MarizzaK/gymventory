@@ -58,6 +58,7 @@ export default function Navbar({
     jackets: ["jacket", "jackets"],
     shorts: ["short", "shorts"],
     leggings: ["legging", "leggings"],
+    hoodies: ["hoodie", "hoodies"],
   };
 
   const handleAccountClick = () => {
@@ -144,6 +145,11 @@ export default function Navbar({
                   Jackets
                 </MenuItem>
                 <MenuItem
+                  onClick={() => handleCategoryClick("women", "hoodies")}
+                >
+                  Hoodies
+                </MenuItem>
+                <MenuItem
                   onClick={() => handleCategoryClick("women", "shorts")}
                 >
                   Shorts
@@ -193,13 +199,16 @@ export default function Navbar({
                 <MenuItem onClick={() => handleCategoryClick("men", "jackets")}>
                   Jackets
                 </MenuItem>
+                <MenuItem onClick={() => handleCategoryClick("men", "hoodies")}>
+                  Hoodies
+                </MenuItem>
                 <MenuItem onClick={() => handleCategoryClick("men", "shorts")}>
                   Shorts
                 </MenuItem>
                 <MenuItem
                   onClick={() => handleCategoryClick("men", "leggings")}
                 >
-                  Leggings
+                  Joggers
                 </MenuItem>
               </Menu>
             </Box>
