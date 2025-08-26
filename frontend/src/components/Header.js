@@ -10,7 +10,7 @@ import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-export default function Header() {
+export default function Header({ user, setUser }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const navigate = useNavigate();
 
@@ -24,11 +24,14 @@ export default function Header() {
   };
 
   const handleDashboard = () => {
-    navigate("/");
+    navigate("/main");
     setDrawerOpen(false);
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("jwtToken"); // ta bort token
+    setUser(null);
+    navigate("/backoffice");
     setDrawerOpen(false);
   };
 
@@ -67,14 +70,18 @@ export default function Header() {
             >
               Dashboard
             </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={handleManageUsers}
-            >
-              Manage users
-            </Button>
+
+            {user?.isAdmin && (
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={handleManageUsers}
+              >
+                Manage Users
+              </Button>
+            )}
+
             <Button
               variant="outlined"
               color="error"

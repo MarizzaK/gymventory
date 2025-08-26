@@ -5,11 +5,18 @@ import axios from "axios";
 import LandingPage from "./pages/LandingPage";
 import ProductPage from "./pages/ProductPage";
 import CustomerLoginPage from "./pages/CustomerLoginPage";
-import MainPage from "./components/MainPage";
-import ManageUsers from "./pages/ManageUsers";
+import MainPage from "./pages/admin/MainPage.js";
+import ManageUsers from "./pages/admin/ManageUsers.js";
 import Navbar from "./components/Navbar";
 import OrderHistoryPage from "./pages/OrderHistoryPage.js";
 import ProfilePage from "./pages/ProfilePage.js";
+import AdminLayout from "./pages/admin/AdminLayout";
+import Register from "./pages/Register";
+import AdminWelcome from "./pages/admin/AdminWelcome.js";
+import Login from "./pages/admin/Login.js";
+
+// ✅ Importera ProtectedRoute
+import ProtectedRoute from "./components/ProtecteRoute.js";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,14 +38,12 @@ function App() {
       }
 
       try {
-        // Hämta user info
         const profileRes = await axios.get(
           "http://localhost:5001/api/customers/profile",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setUser(profileRes.data);
 
-        // Hämta cart
         const cartRes = await axios.get(
           "http://localhost:5001/api/customers/cart",
           { headers: { Authorization: `Bearer ${token}` } }
@@ -58,14 +63,13 @@ function App() {
     initCart();
   }, []);
 
-  // --- Hämta produkter (för sök) ---
   useEffect(() => {
     async function fetchProducts() {
       try {
         const res = await fetch("http://localhost:5001/api/products");
         const data = await res.json();
         setProducts(data);
-        setFilteredProducts(data); // för sök
+        setFilteredProducts(data);
       } catch (err) {
         console.error("Failed to fetch products:", err);
       }
@@ -73,14 +77,12 @@ function App() {
     fetchProducts();
   }, []);
 
-  // --- Hantera login (JWT eller Google) ---
   const handleLogin = (userData, token) => {
     if (token) {
       localStorage.setItem("jwtToken", token);
     }
     setUser(userData);
 
-    // Hämta cart från backend
     axios
       .get("http://localhost:5001/api/customers/cart", {
         headers: { Authorization: `Bearer ${token}` },
@@ -89,7 +91,6 @@ function App() {
       .catch((err) => console.error("Failed to fetch user cart:", err));
   };
 
-  // --- Spara cart ---
   const saveCart = async (updatedCart) => {
     setCart(updatedCart);
     if (user) {
@@ -111,7 +112,6 @@ function App() {
     }
   };
 
-  // --- Lägg till i cart (+) ---
   const addToCart = (product, size, quantity = 1) => {
     const index = cart.findIndex(
       (item) => item._id === product._id && item.size === size
@@ -127,7 +127,6 @@ function App() {
     saveCart(updatedCart);
   };
 
-  // --- Ta bort från cart (-) ---
   const removeFromCart = (index, quantity = 1) => {
     const updatedCart = [...cart];
     if ((updatedCart[index].cartQuantity || 1) > quantity) {
@@ -138,7 +137,6 @@ function App() {
     saveCart(updatedCart);
   };
 
-  // --- Logout ---
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("jwtToken");
@@ -150,55 +148,147 @@ function App() {
 
   return (
     <Router>
-      <Navbar
-        user={user}
-        setUser={setUser}
-        cart={cart}
-        addToCart={addToCart}
-        removeFromCart={removeFromCart}
-        handleLogout={handleLogout}
-        products={products}
-        setFilteredProducts={setFilteredProducts}
-      />
       <Routes>
+        {/* Vanliga sidor med Navbar */}
         <Route
           path="/"
           element={
-            <LandingPage
-              user={user}
-              addToCart={addToCart}
-              products={filteredProducts}
-            />
+            <>
+              <Navbar
+                user={user}
+                setUser={setUser}
+                cart={cart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                handleLogout={handleLogout}
+                products={products}
+                setFilteredProducts={setFilteredProducts}
+              />
+              <LandingPage
+                user={user}
+                addToCart={addToCart}
+                products={filteredProducts}
+              />
+            </>
           }
         />
         <Route
           path="/product/:id"
-          element={<ProductPage user={user} addToCart={addToCart} />}
+          element={
+            <>
+              <Navbar
+                user={user}
+                setUser={setUser}
+                cart={cart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                handleLogout={handleLogout}
+                products={products}
+                setFilteredProducts={setFilteredProducts}
+              />
+              <ProductPage user={user} addToCart={addToCart} />
+            </>
+          }
         />
         <Route
           path="/customer-login"
           element={<CustomerLoginPage user={user} handleLogin={handleLogin} />}
         />
-        <Route path="/main" element={<MainPage />} />
-        <Route path="/manage-users" element={<ManageUsers />} />
         <Route
           path="/order-history"
-          element={<OrderHistoryPage user={user} />}
+          element={
+            <>
+              <Navbar
+                user={user}
+                setUser={setUser}
+                cart={cart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                handleLogout={handleLogout}
+                products={products}
+                setFilteredProducts={setFilteredProducts}
+              />
+              <OrderHistoryPage user={user} />
+            </>
+          }
         />
         <Route
           path="/profile"
-          element={<ProfilePage user={user} setUser={setUser} />}
+          element={
+            <>
+              <Navbar
+                user={user}
+                setUser={setUser}
+                cart={cart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                handleLogout={handleLogout}
+                products={products}
+                setFilteredProducts={setFilteredProducts}
+              />
+              <ProfilePage user={user} setUser={setUser} />
+            </>
+          }
         />
         <Route
           path="/products"
           element={
-            <LandingPage
-              user={user}
-              addToCart={addToCart}
-              products={filteredProducts}
-            />
+            <>
+              <Navbar
+                user={user}
+                setUser={setUser}
+                cart={cart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                handleLogout={handleLogout}
+                products={products}
+                setFilteredProducts={setFilteredProducts}
+              />
+              <LandingPage
+                user={user}
+                addToCart={addToCart}
+                products={filteredProducts}
+              />
+            </>
           }
         />
+
+        {/* Backoffice / Admin */}
+        <Route path="/backoffice" element={<Login setUser={setUser} />} />
+
+        <Route
+          path="/admin-welcome"
+          element={
+            <ProtectedRoute user={user}>
+              <AdminWelcome user={user} setUser={setUser} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/main"
+          element={
+            <ProtectedRoute user={user}>
+              <AdminLayout user={user} setUser={setUser}>
+                <MainPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/manage-users"
+          element={
+            <ProtectedRoute user={user} adminOnly={true}>
+              <AdminLayout user={user} setUser={setUser}>
+                <ManageUsers />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Register */}
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );
