@@ -10,6 +10,7 @@ export default function Inventorytable({ rows, setEditProductId }) {
     { field: "_id", headerName: "ID", flex: 1 },
     { field: "name", headerName: "Name", flex: 1 },
     { field: "category", headerName: "Category", flex: 1 },
+    { field: "gender", headerName: "Gender", flex: 1 },
     {
       field: "quantity",
       headerName: "Quantity",
@@ -29,6 +30,7 @@ export default function Inventorytable({ rows, setEditProductId }) {
       sortable: false,
       flex: 1,
     },
+
     {
       field: "delete",
       headerName: "Delete",

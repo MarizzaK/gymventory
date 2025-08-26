@@ -45,10 +45,17 @@ export default function LandingPage({ addToCart, products }) {
     const params = new URLSearchParams(location.search);
     const category = params.get("category");
 
+    console.log("Filter-param:", category);
+    console.log(
+      "Produktkategorier:",
+      products.map((p) => p.category)
+    );
+
     if (category && products) {
-      const filtered = products.filter(
-        (p) => p.category.toLowerCase() === category.toLowerCase()
+      const filtered = products.filter((p) =>
+        p.category.toLowerCase().includes(category.toLowerCase())
       );
+      console.log("Filtrerade produkter:", filtered);
       setFilteredProducts(filtered);
     } else {
       setFilteredProducts(products || []);
@@ -136,7 +143,6 @@ export default function LandingPage({ addToCart, products }) {
         )}
       </Box>
 
-      {/* Modal för storlek */}
       <Modal open={openModal} onClose={handleCloseModal}>
         <Box
           sx={{

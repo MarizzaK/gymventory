@@ -38,13 +38,14 @@ const getProductById = async (req, res) => {
 
 // Create product
 const createProduct = async (req, res) => {
-  const { name, category, quantity, price, description } = req.body;
+  const { name, category, gender, quantity, price, description } = req.body;
   const image = req.file ? req.file.filename : null;
 
   try {
     const product = await Product.create({
       name,
       category,
+      gender,
       quantity,
       price,
       description,
@@ -63,7 +64,7 @@ const createProduct = async (req, res) => {
 
 // Update product
 const updateProduct = async (req, res) => {
-  const { name, category, quantity, price, description } = req.body;
+  const { name, category, gender, quantity, price, description } = req.body;
   const { id } = req.params;
 
   try {
@@ -72,6 +73,7 @@ const updateProduct = async (req, res) => {
 
     product.name = name || product.name;
     product.category = category || product.category;
+    product.gender = gender || product.gender;
     product.quantity = quantity || product.quantity;
     product.price = price || product.price;
     product.description = description || product.description;

@@ -189,6 +189,16 @@ function App() {
           path="/profile"
           element={<ProfilePage user={user} setUser={setUser} />}
         />
+        <Route
+          path="/products"
+          element={
+            <LandingPage
+              user={user}
+              addToCart={addToCart}
+              products={filteredProducts}
+            />
+          }
+        />
       </Routes>
     </Router>
   );

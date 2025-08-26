@@ -52,6 +52,14 @@ export default function Navbar({
 
   const navigate = useNavigate();
 
+  const categorySynonyms = {
+    bra: ["bra", "bras", "sports bra", "sports bras"],
+    tops: ["top", "tops"],
+    jackets: ["jacket", "jackets"],
+    shorts: ["short", "shorts"],
+    leggings: ["legging", "leggings"],
+  };
+
   const handleAccountClick = () => {
     if (user) setDrawerOpen(true);
     else navigate("/customer-login");
@@ -63,21 +71,26 @@ export default function Navbar({
 
     if (products && setFilteredProducts) {
       const filtered = products.filter((p) =>
-        p.name.toLowerCase().includes(value.toLowerCase())
+        (p.name || "").toLowerCase().includes(value.toLowerCase())
       );
       setFilteredProducts(filtered);
     }
   };
 
-  const handleCategoryClick = (category) => {
+  const handleCategoryClick = (gender, categoryKey) => {
     if (products && setFilteredProducts) {
-      const filtered = products.filter(
-        (p) => p.category.toLowerCase() === category.toLowerCase()
-      );
+      const keywords = categorySynonyms[categoryKey] || [categoryKey];
+      const filtered = products.filter((p) => {
+        const cat = (p.category || "").toLowerCase().replace(/[\s-]/g, "");
+        const matchCat = keywords.some((k) =>
+          cat.includes((k || "").toLowerCase().replace(/[\s-]/g, ""))
+        );
+        const matchGender =
+          (p.gender || "").toLowerCase() === (gender || "").toLowerCase();
+        return matchCat && matchGender;
+      });
       setFilteredProducts(filtered);
     }
-
-    navigate(`/products?category=${category.toLowerCase()}`);
 
     setWomensOpen(false);
     setMensOpen(false);
@@ -119,19 +132,25 @@ export default function Navbar({
                 <MenuItem disabled sx={{ fontWeight: "bold" }}>
                   SHOP BY CATEGORY
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("sports-bras")}>
+                <MenuItem onClick={() => handleCategoryClick("women", "bra")}>
                   Sports Bras
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("tops")}>
+                <MenuItem onClick={() => handleCategoryClick("women", "tops")}>
                   Tops
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("jackets")}>
+                <MenuItem
+                  onClick={() => handleCategoryClick("women", "jackets")}
+                >
                   Jackets
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("shorts")}>
+                <MenuItem
+                  onClick={() => handleCategoryClick("women", "shorts")}
+                >
                   Shorts
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("leggings")}>
+                <MenuItem
+                  onClick={() => handleCategoryClick("women", "leggings")}
+                >
                   Leggings
                 </MenuItem>
               </Menu>
@@ -168,16 +187,18 @@ export default function Navbar({
                 <MenuItem disabled sx={{ fontWeight: "bold" }}>
                   SHOP BY CATEGORY
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("tops")}>
+                <MenuItem onClick={() => handleCategoryClick("men", "tops")}>
                   Tops
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("jackets")}>
+                <MenuItem onClick={() => handleCategoryClick("men", "jackets")}>
                   Jackets
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("shorts")}>
+                <MenuItem onClick={() => handleCategoryClick("men", "shorts")}>
                   Shorts
                 </MenuItem>
-                <MenuItem onClick={() => handleCategoryClick("leggings")}>
+                <MenuItem
+                  onClick={() => handleCategoryClick("men", "leggings")}
+                >
                   Leggings
                 </MenuItem>
               </Menu>
@@ -247,7 +268,6 @@ export default function Navbar({
             <ListItem>
               <ListItemText primary={`Hello, ${user?.name || "User"}`} />
             </ListItem>
-
             <ListItem button onClick={() => setProfileOpen(!profileOpen)}>
               <ListItemText primary="Profile" />
               {profileOpen ? <ExpandLess /> : <ExpandMore />}
@@ -276,7 +296,6 @@ export default function Navbar({
                 </ListItem>
               </List>
             </Collapse>
-
             <ListItem
               button
               onClick={() => {
