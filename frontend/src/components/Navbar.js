@@ -80,21 +80,31 @@ export default function Navbar({
 
   const handleCategoryClick = (gender, categoryKey) => {
     if (products && setFilteredProducts) {
-      const keywords = categorySynonyms[categoryKey] || [categoryKey];
-      const filtered = products.filter((p) => {
-        const cat = (p.category || "").toLowerCase().replace(/[\s-]/g, "");
-        const matchCat = keywords.some((k) =>
-          cat.includes((k || "").toLowerCase().replace(/[\s-]/g, ""))
+      let filtered;
+      if (!categoryKey) {
+        filtered = products.filter(
+          (p) => (p.gender || "").toLowerCase() === gender.toLowerCase()
         );
-        const matchGender =
-          (p.gender || "").toLowerCase() === (gender || "").toLowerCase();
-        return matchCat && matchGender;
-      });
+      } else {
+        const keywords = categorySynonyms[categoryKey] || [categoryKey];
+        filtered = products.filter((p) => {
+          const cat = (p.category || "").toLowerCase().replace(/[\s-]/g, "");
+          const matchCat = keywords.some((k) =>
+            cat.includes((k || "").toLowerCase().replace(/[\s-]/g, ""))
+          );
+          const matchGender =
+            (p.gender || "").toLowerCase() === gender.toLowerCase();
+          return matchCat && matchGender;
+        });
+      }
       setFilteredProducts(filtered);
     }
 
-    setWomensOpen(false);
-    setMensOpen(false);
+    // Stäng bara dropdown om kategori valdes
+    if (categoryKey) {
+      setWomensOpen(false);
+      setMensOpen(false);
+    }
   };
 
   return (
@@ -104,12 +114,12 @@ export default function Navbar({
           <Box sx={{ display: "flex", gap: 2 }}>
             {/* WOMEN */}
             <Box
+              sx={{ display: "inline-block" }}
               onMouseEnter={() => {
                 setWomensOpen(true);
                 setMensOpen(false);
               }}
               onMouseLeave={() => setWomensOpen(false)}
-              sx={{ display: "inline-block" }}
             >
               <Box
                 ref={womensRef}
@@ -122,6 +132,7 @@ export default function Navbar({
                 <Typography>WOMEN</Typography>
                 <ArrowDropDownIcon />
               </Box>
+
               <Menu
                 anchorEl={womensRef.current}
                 open={womensOpen}
@@ -130,6 +141,11 @@ export default function Navbar({
                 transformOrigin={{ vertical: "top", horizontal: "left" }}
                 disableAutoFocusItem
               >
+                {/* Alla produkter för kvinnlig kategori */}
+                <MenuItem onClick={() => handleCategoryClick("women", "")}>
+                  All Women
+                </MenuItem>
+
                 <MenuItem disabled sx={{ fontWeight: "bold" }}>
                   SHOP BY CATEGORY
                 </MenuItem>
@@ -164,12 +180,12 @@ export default function Navbar({
 
             {/* MEN */}
             <Box
+              sx={{ display: "inline-block" }}
               onMouseEnter={() => {
                 setMensOpen(true);
                 setWomensOpen(false);
               }}
               onMouseLeave={() => setMensOpen(false)}
-              sx={{ display: "inline-block" }}
             >
               <Box
                 ref={mensRef}
@@ -182,6 +198,7 @@ export default function Navbar({
                 <Typography>MEN</Typography>
                 <ArrowDropDownIcon />
               </Box>
+
               <Menu
                 anchorEl={mensRef.current}
                 open={mensOpen}
@@ -190,6 +207,10 @@ export default function Navbar({
                 transformOrigin={{ vertical: "top", horizontal: "left" }}
                 disableAutoFocusItem
               >
+                <MenuItem onClick={() => handleCategoryClick("men", "")}>
+                  All Men
+                </MenuItem>
+
                 <MenuItem disabled sx={{ fontWeight: "bold" }}>
                   SHOP BY CATEGORY
                 </MenuItem>
@@ -205,9 +226,7 @@ export default function Navbar({
                 <MenuItem onClick={() => handleCategoryClick("men", "shorts")}>
                   Shorts
                 </MenuItem>
-                <MenuItem
-                  onClick={() => handleCategoryClick("men", "leggings")}
-                >
+                <MenuItem onClick={() => handleCategoryClick("men", "joggers")}>
                   Joggers
                 </MenuItem>
               </Menu>
