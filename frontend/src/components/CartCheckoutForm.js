@@ -17,6 +17,7 @@ export default function CartCheckoutForm({
   removeFromCart,
   user,
   onClose,
+  setInventoryRows,
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -78,7 +79,7 @@ export default function CartCheckoutForm({
       if (result.error) {
         setMessage(result.error.message);
       } else if (result.paymentIntent.status === "succeeded") {
-        // Betalning lyckades – skapa order i backend
+        // --- Skapa order ---
         if (user && token) {
           await fetch("http://localhost:5001/api/orders", {
             method: "POST",
@@ -102,9 +103,30 @@ export default function CartCheckoutForm({
           });
         }
 
+        // --- Uppdatera lager i backend ---
+        await fetch("http://localhost:5001/api/products/decrease-stock", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify({
+            items: cart.map((item) => ({
+              _id: item._id,
+              quantity: item.cartQuantity || 1,
+            })),
+          }),
+        });
+
+        if (setInventoryRows) {
+          const updated = await fetch(
+            "http://localhost:5001/api/products"
+          ).then((res) => res.json());
+          setInventoryRows(updated);
+        }
+
         setMessage("Betalning genomförd! 🎉");
         localStorage.removeItem("cart_guest");
-        onClose();
       }
     } catch (err) {
       console.error(err);

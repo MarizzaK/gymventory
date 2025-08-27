@@ -26,8 +26,8 @@ export default function ManageUsers() {
     email: "",
     isAdmin: false,
   });
-  const [editingUserId, setEditingUserId] = useState(null); // Id för edit
-  const [originalEmail, setOriginalEmail] = useState(""); // för att kolla e-poständring
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [originalEmail, setOriginalEmail] = useState("");
 
   // Hämta alla användare
   const fetchUsers = async () => {

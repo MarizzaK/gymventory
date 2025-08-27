@@ -29,7 +29,7 @@ export default function Header({ user, setUser }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("jwtToken"); // ta bort token
+    localStorage.removeItem("jwtToken");
     setUser(null);
     navigate("/backoffice");
     setDrawerOpen(false);

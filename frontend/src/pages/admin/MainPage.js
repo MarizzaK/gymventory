@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import InventoryTable from "./InventoryTable";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,11 +10,8 @@ const MainPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
 
-  useEffect(() => {
-    handleFetchData();
-  }, []);
-
-  const handleFetchData = async () => {
+  // Memoiserad fetch-funktion
+  const handleFetchData = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:5001/api/products");
       const data = await response.json();
@@ -26,7 +23,11 @@ const MainPage = () => {
     } catch (error) {
       console.error("Failed to fetch products:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    handleFetchData();
+  }, [handleFetchData]);
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -35,7 +36,11 @@ const MainPage = () => {
   return (
     <div style={{ padding: "20px" }}>
       {/* Inventory Table */}
-      <InventoryTable rows={rows} setEditProductId={setEditProductId} />
+      <InventoryTable
+        rows={rows}
+        setEditProductId={setEditProductId}
+        setRows={setRows}
+      />
 
       <Button
         onClick={handleOpenModal}
@@ -57,6 +62,7 @@ const MainPage = () => {
         open={openModal}
         setOpen={setOpenModal}
         editProductId={editProductId}
+        setEditProductId={setEditProductId}
       />
     </div>
   );

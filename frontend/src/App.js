@@ -15,54 +15,83 @@ import Register from "./pages/Register";
 import AdminWelcome from "./pages/admin/AdminWelcome.js";
 import Login from "./pages/admin/Login.js";
 
-// ✅ Importera ProtectedRoute
 import ProtectedRoute from "./components/ProtecteRoute.js";
+
+const INACTIVITY_LIMIT = 5 * 60 * 1000;
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
-
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // --- Init cart baserat på guest/user ---
+  // --- Logout funktion ---
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("lastActive");
+    const guestCart = localStorage.getItem("cart_guest");
+    setCart(guestCart ? JSON.parse(guestCart) : []);
+  };
+
+  // --- Init cart och user baserat på token och aktivitet ---
   useEffect(() => {
-    const initCart = async () => {
-      const token = localStorage.getItem("jwtToken");
-      if (!token) {
-        const guestCart = localStorage.getItem("cart_guest");
-        setCart(guestCart ? JSON.parse(guestCart) : []);
+    const token = localStorage.getItem("jwtToken");
+    const lastActive = localStorage.getItem("lastActive");
+
+    if (token && lastActive) {
+      const inactiveTime = Date.now() - parseInt(lastActive);
+      if (inactiveTime > INACTIVITY_LIMIT) {
+        handleLogout();
         setLoading(false);
         return;
       }
 
-      try {
-        const profileRes = await axios.get(
-          "http://localhost:5001/api/customers/profile",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setUser(profileRes.data);
+      // Hämta profil och cart
+      const initUser = async () => {
+        try {
+          const profileRes = await axios.get(
+            "http://localhost:5001/api/customers/profile",
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setUser(profileRes.data);
 
-        const cartRes = await axios.get(
-          "http://localhost:5001/api/customers/cart",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setCart(cartRes.data || []);
-      } catch (err) {
-        console.error("Error fetching user/cart:", err);
-        localStorage.removeItem("jwtToken");
-        setUser(null);
-        const guestCart = localStorage.getItem("cart_guest");
-        setCart(guestCart ? JSON.parse(guestCart) : []);
-      } finally {
-        setLoading(false);
+          const cartRes = await axios.get(
+            "http://localhost:5001/api/customers/cart",
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setCart(cartRes.data || []);
+        } catch (err) {
+          console.error(err);
+          handleLogout();
+        } finally {
+          setLoading(false);
+        }
+      };
+      initUser();
+    } else {
+      const guestCart = localStorage.getItem("cart_guest");
+      setCart(guestCart ? JSON.parse(guestCart) : []);
+      setLoading(false);
+    }
+
+    // Uppdatera lastActive vid aktivitet
+    const updateLastActive = () => {
+      if (localStorage.getItem("jwtToken")) {
+        localStorage.setItem("lastActive", Date.now());
       }
     };
+    window.addEventListener("mousemove", updateLastActive);
+    window.addEventListener("keydown", updateLastActive);
 
-    initCart();
+    return () => {
+      window.removeEventListener("mousemove", updateLastActive);
+      window.removeEventListener("keydown", updateLastActive);
+    };
   }, []);
 
+  // --- Hämta produkter ---
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -77,9 +106,11 @@ function App() {
     fetchProducts();
   }, []);
 
+  // --- Login funktion ---
   const handleLogin = (userData, token) => {
     if (token) {
       localStorage.setItem("jwtToken", token);
+      localStorage.setItem("lastActive", Date.now());
     }
     setUser(userData);
 
@@ -91,6 +122,7 @@ function App() {
       .catch((err) => console.error("Failed to fetch user cart:", err));
   };
 
+  // --- Cart funktioner ---
   const saveCart = async (updatedCart) => {
     setCart(updatedCart);
     if (user) {
@@ -137,19 +169,11 @@ function App() {
     saveCart(updatedCart);
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("jwtToken");
-    const guestCart = localStorage.getItem("cart_guest");
-    setCart(guestCart ? JSON.parse(guestCart) : []);
-  };
-
   if (loading) return <div>Loading...</div>;
 
   return (
     <Router>
       <Routes>
-        {/* Vanliga sidor med Navbar */}
         <Route
           path="/"
           element={
@@ -270,7 +294,7 @@ function App() {
           element={
             <ProtectedRoute user={user}>
               <AdminLayout user={user} setUser={setUser}>
-                <MainPage />
+                <MainPage products={products} setProducts={setProducts} />
               </AdminLayout>
             </ProtectedRoute>
           }

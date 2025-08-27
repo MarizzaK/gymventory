@@ -4,7 +4,6 @@ import axios from "axios";
 export default function useCart(user) {
   const [cart, setCart] = useState([]);
 
-  // Initiera cart vid inloggning eller som guest
   useEffect(() => {
     const initCart = async () => {
       if (!user) {
@@ -32,35 +31,14 @@ export default function useCart(user) {
     initCart();
   }, [user]);
 
-  // Summera total
-  const computeTotal = (cartItems) => {
-    return cartItems.reduce(
-      (acc, item) => acc + (item.price || 0) * (item.cartQuantity || 1),
-      0
-    );
-  };
-
-  // Spara cart
   const saveCart = async (updatedCart) => {
     setCart(updatedCart);
 
     if (user) {
       try {
         await axios.post(
-          "http://localhost:5001/api/orders",
-          {
-            items: updatedCart.map((item) => ({
-              _id: item._id,
-              name: item.name,
-              price: item.price,
-              image: item.image,
-              size: item.size,
-              cartQuantity: item.cartQuantity,
-            })),
-            total: computeTotal(updatedCart),
-            name: user.name,
-            address: user.address,
-          },
+          "http://localhost:5001/api/customers/cart",
+          { cart: updatedCart },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -75,7 +53,6 @@ export default function useCart(user) {
     }
   };
 
-  // Lägg till produkt i cart
   const addToCart = (product, size, quantity = 1) => {
     const index = cart.findIndex(
       (item) => item._id === product._id && item.size === size
@@ -86,20 +63,12 @@ export default function useCart(user) {
       updatedCart[index].cartQuantity =
         (updatedCart[index].cartQuantity || 1) + quantity;
     } else {
-      updatedCart.push({
-        _id: product._id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        size,
-        cartQuantity: quantity,
-      });
+      updatedCart.push({ ...product, size, cartQuantity: quantity });
     }
 
     saveCart(updatedCart);
   };
 
-  // Ta bort produkt från cart
   const removeFromCart = (index, quantity = 1) => {
     const updatedCart = [...cart];
     if ((updatedCart[index].cartQuantity || 1) > quantity) {
@@ -110,7 +79,6 @@ export default function useCart(user) {
     saveCart(updatedCart);
   };
 
-  // Migrera guest cart till user cart vid login
   const migrateGuestCart = async (jwtToken) => {
     const guestCart = localStorage.getItem("cart_guest");
     if (!guestCart) return;
@@ -118,20 +86,8 @@ export default function useCart(user) {
     try {
       const updatedCart = [...cart, ...JSON.parse(guestCart)];
       await axios.post(
-        "http://localhost:5001/api/orders",
-        {
-          items: updatedCart.map((item) => ({
-            _id: item._id,
-            name: item.name,
-            price: item.price,
-            image: item.image,
-            size: item.size,
-            cartQuantity: item.cartQuantity,
-          })),
-          total: computeTotal(updatedCart),
-          name: user.name,
-          address: user.address,
-        },
+        "http://localhost:5001/api/customers/cart",
+        { cart: updatedCart },
         { headers: { Authorization: `Bearer ${jwtToken}` } }
       );
       setCart(updatedCart);

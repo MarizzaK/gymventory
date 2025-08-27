@@ -12,6 +12,7 @@ const productRoutes = require("./routes/productRoutes");
 const userRoutes = require("./routes/userRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const Product = require("./models/product");
 
 const app = express();
 const server = http.createServer(app);

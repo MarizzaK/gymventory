@@ -23,8 +23,8 @@ export default function Login({ setUser }) {
         return;
       }
 
-      // Spara JWT-token och user
       localStorage.setItem("jwtToken", data.token);
+      localStorage.setItem("lastActive", Date.now()); // <-- timestamp
       setUser(data.user);
 
       // Navigera alltid till AdminWelcome efter backoffice-login

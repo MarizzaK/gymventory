@@ -6,7 +6,7 @@ import ProductModal from "./ProductModal";
 
 const paginationModel = { page: 0, pageSize: 5 };
 
-export default function Inventorytable({
+export default function InventoryTable({
   rows: initialRows,
   setEditProductId,
 }) {
@@ -18,6 +18,7 @@ export default function Inventorytable({
     if (initialRows) setRows(initialRows);
   }, [initialRows]);
 
+  // --- Delete produkt ---
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this product?"
@@ -39,6 +40,7 @@ export default function Inventorytable({
     if (setEditProductId) setEditProductId(null);
   };
 
+  // --- Edit produkt ---
   const handleSetEditProductId = (id) => {
     setLocalEditProductId(id);
     setOpenModal(true);
