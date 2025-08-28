@@ -20,11 +20,11 @@ export default function OrderHistoryPage({ user }) {
     fetchOrders();
   }, [user]);
 
-  if (!orders.length) return <p>Inga tidigare beställningar.</p>;
+  if (!orders.length) return <p>"No previous orders."</p>;
 
   return (
     <div>
-      <h2>Orderhistorik</h2>
+      <h2>My Orders</h2>
       {orders.map((order, idx) => (
         <div
           key={idx}
@@ -34,7 +34,7 @@ export default function OrderHistoryPage({ user }) {
             padding: "10px",
           }}
         >
-          <p>Orderdatum: {new Date(order.createdAt).toLocaleString()}</p>
+          <p>"Order Date:": {new Date(order.createdAt).toLocaleString()}</p>
           <p>Total: ${order.total.toFixed(2)}</p>
           <ul>
             {order.items.map((item, i) => (

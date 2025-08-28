@@ -49,7 +49,7 @@ export default function CartCheckoutForm({
     try {
       const token = localStorage.getItem("jwtToken");
 
-      // Uppdatera profil innan betalning
+      // Update profile before payment
       if (user && token) {
         await fetch("http://localhost:5001/api/customers/profile", {
           method: "PUT",
@@ -61,7 +61,7 @@ export default function CartCheckoutForm({
         });
       }
 
-      // Skapa PaymentIntent
+      // Create PaymentIntent
       const res = await fetch("http://localhost:5001/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,7 +79,7 @@ export default function CartCheckoutForm({
       if (result.error) {
         setMessage(result.error.message);
       } else if (result.paymentIntent.status === "succeeded") {
-        // --- Skapa order ---
+        // --- Create order ---
         if (user && token) {
           await fetch("http://localhost:5001/api/orders", {
             method: "POST",
@@ -103,7 +103,7 @@ export default function CartCheckoutForm({
           });
         }
 
-        // --- Uppdatera lager i backend ---
+        // --- Update stock in backend ---
         await fetch("http://localhost:5001/api/products/decrease-stock", {
           method: "PUT",
           headers: {
@@ -125,12 +125,12 @@ export default function CartCheckoutForm({
           setInventoryRows(updated);
         }
 
-        setMessage("Betalning genomförd! 🎉");
+        setMessage("Payment successful! 🎉");
         localStorage.removeItem("cart_guest");
       }
     } catch (err) {
       console.error(err);
-      setMessage("Något gick fel. Försök igen.");
+      setMessage("Something went wrong. Please try again.");
     }
 
     setLoading(false);
@@ -151,13 +151,13 @@ export default function CartCheckoutForm({
       </IconButton>
 
       <Typography variant="h6" sx={{ flex: 1, textAlign: "center" }}>
-        Din Varukorg
+        Your Cart
       </Typography>
 
       <Divider sx={{ mb: 2 }} />
 
       {cart.length === 0 ? (
-        <Typography>Ingen vara i varukorgen</Typography>
+        <Typography>No items in the cart</Typography>
       ) : (
         cart.map((item, index) => (
           <Box
@@ -176,7 +176,7 @@ export default function CartCheckoutForm({
             />
             <Box sx={{ flex: 1 }}>
               <Typography>{item.name}</Typography>
-              <Typography variant="body2">Storlek: {item.size}</Typography>
+              <Typography variant="body2">Size: {item.size}</Typography>
               <Box
                 sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
               >
@@ -201,7 +201,7 @@ export default function CartCheckoutForm({
                 size="small"
                 onClick={() => removeFromCart(index, item.cartQuantity || 1)}
               >
-                Ta bort
+                Remove
               </Button>
             </Box>
           </Box>
@@ -209,23 +209,23 @@ export default function CartCheckoutForm({
       )}
 
       <Divider sx={{ my: 2 }} />
-      <Typography variant="h6">Leveransinformation</Typography>
+      <Typography variant="h6">Shipping Information</Typography>
       <TextField
         fullWidth
-        label="Namn"
+        label="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
         sx={{ mb: 2 }}
       />
       <TextField
         fullWidth
-        label="Adress"
+        label="Address"
         value={address}
         onChange={(e) => setAddress(e.target.value)}
         sx={{ mb: 2 }}
       />
 
-      <Typography variant="h6">Betalning</Typography>
+      <Typography variant="h6">Payment</Typography>
       <Box sx={{ p: 2, border: "1px solid #ccc", borderRadius: 1, mb: 2 }}>
         <CardElement />
       </Box>
@@ -241,12 +241,12 @@ export default function CartCheckoutForm({
         fullWidth
         startIcon={loading && <CircularProgress size={20} color="inherit" />}
       >
-        {loading ? "Bearbetar..." : "Betala"}
+        {loading ? "Processing..." : "Pay"}
       </Button>
 
       {message && (
         <Typography
-          color={message.includes("Betalning") ? "success.main" : "error"}
+          color={message.includes("Payment") ? "success.main" : "error"}
           sx={{ mt: 2 }}
         >
           {message}

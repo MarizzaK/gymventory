@@ -1,4 +1,3 @@
-// ProductModal.js
 import * as React from "react";
 import { useState, useEffect } from "react";
 import Backdrop from "@mui/material/Backdrop";
@@ -60,7 +59,7 @@ export default function ProductModal({
         );
 
         if (!response.ok) {
-          alert("Något gick fel vid hämtning av produkten.");
+          alert("Something went wrong while fetching the product.");
           return;
         }
 
@@ -79,7 +78,7 @@ export default function ProductModal({
         setEditing(true);
       } catch (error) {
         console.error(error);
-        alert("Ett fel inträffade vid hämtning av produkten.");
+        alert("An error occurred while fetching the product.");
       }
     }
 
@@ -142,7 +141,7 @@ export default function ProductModal({
         );
       }
 
-      alert(editing ? "Produkten uppdaterades!" : "Produkten lades till!");
+      alert(editing ? "Product updated!" : "Product added!");
       setOpen(false);
       if (setEditProductId) setEditProductId(null);
       setEditing(false);
@@ -156,7 +155,7 @@ export default function ProductModal({
       });
       setImage(null);
     } else {
-      alert("Något gick fel. Försök igen.");
+      alert("Something went wrong. Please try again.");
     }
   };
 
@@ -171,11 +170,11 @@ export default function ProductModal({
       <Fade in={open}>
         <Box sx={style}>
           <Typography variant="h6" component="h2" gutterBottom>
-            {editing ? "Redigera produkt" : "Lägg till ny produkt"}
+            {editing ? "Edit Product" : "Add New Product"}
           </Typography>
           <form onSubmit={handleSubmit}>
             <TextField
-              label="Namn"
+              label="Name"
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -184,7 +183,7 @@ export default function ProductModal({
               margin="normal"
             />
             <TextField
-              label="Kategori"
+              label="Category"
               name="category"
               value={formData.category}
               onChange={handleChange}
@@ -193,7 +192,7 @@ export default function ProductModal({
               margin="normal"
             />
             <FormControl fullWidth margin="normal">
-              <InputLabel id="gender-label">Kön</InputLabel>
+              <InputLabel id="gender-label">"Gender"</InputLabel>
               <Select
                 labelId="gender-label"
                 name="gender"
@@ -201,12 +200,12 @@ export default function ProductModal({
                 onChange={handleChange}
                 required
               >
-                <MenuItem value="women">Kvinnor</MenuItem>
-                <MenuItem value="men">Män</MenuItem>
+                <MenuItem value="women">Women</MenuItem>
+                <MenuItem value="men">Men</MenuItem>
               </Select>
             </FormControl>
             <TextField
-              label="Antal"
+              label="Quantity"
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
@@ -215,7 +214,7 @@ export default function ProductModal({
               margin="normal"
             />
             <TextField
-              label="Pris"
+              label="Price"
               name="price"
               value={formData.price}
               onChange={handleChange}
@@ -224,7 +223,7 @@ export default function ProductModal({
               margin="normal"
             />
             <TextField
-              label="Beskrivning"
+              label="Description"
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -247,7 +246,7 @@ export default function ProductModal({
               {image ? (
                 <p>{image.name}</p>
               ) : (
-                <p>Dra & släpp en bild här eller klicka på knappen</p>
+                <p>Drag & drop an image here or click the button</p>
               )}
               <input
                 type="file"
@@ -269,7 +268,7 @@ export default function ProductModal({
                   py: 1,
                 }}
               >
-                Välj fil
+                Choose File
               </Button>
             </div>
             <Button
@@ -279,7 +278,7 @@ export default function ProductModal({
               fullWidth
               sx={{ mt: 2 }}
             >
-              {editing ? "Uppdatera" : "Lägg till"}
+              {editing ? "Update" : "Add"}
             </Button>
           </form>
         </Box>

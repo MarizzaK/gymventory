@@ -102,7 +102,6 @@ export default function Navbar({
       navigate("/", { replace: false });
     }
 
-    // Stäng bara dropdown om kategori valdes
     if (categoryKey) {
       setWomensOpen(false);
       setMensOpen(false);
@@ -312,7 +311,7 @@ export default function Navbar({
                     setDrawerOpen(false);
                   }}
                 >
-                  <ListItemText primary="Orderhistorik" />
+                  <ListItemText primary="My Orders" />
                 </ListItem>
                 <ListItem
                   button

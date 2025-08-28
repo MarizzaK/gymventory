@@ -56,7 +56,6 @@ export default function InventoryTable({
     {
       field: "description",
       headerName: "Description",
-      description: "This column has a value getter and is not sortable.",
       sortable: false,
       flex: 1,
     },
@@ -91,7 +90,20 @@ export default function InventoryTable({
   ];
 
   return (
-    <Paper sx={{ height: 400, width: "100%" }}>
+    <Paper sx={{ height: 500, width: "100%", p: 2 }}>
+      {/* Add New Product-knapp */}
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{ mb: 2 }}
+        onClick={() => {
+          setLocalEditProductId(null);
+          setOpenModal(true);
+        }}
+      >
+        Add New Product
+      </Button>
+
       <DataGrid
         rows={rows}
         columns={columns}

@@ -28,6 +28,11 @@ export default function Header({ user, setUser }) {
     setDrawerOpen(false);
   };
 
+  const handleProfile = () => {
+    navigate("/admin-welcome");
+    setDrawerOpen(false);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
     setUser(null);
@@ -62,6 +67,15 @@ export default function Header({ user, setUser }) {
       <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
         <Box sx={{ width: 250, p: 2 }}>
           <Stack spacing={2}>
+            <Button
+              variant="contained"
+              color="info"
+              fullWidth
+              onClick={handleProfile}
+            >
+              Profile
+            </Button>
+
             <Button
               variant="contained"
               color="secondary"

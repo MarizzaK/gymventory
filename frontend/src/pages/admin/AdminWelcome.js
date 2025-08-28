@@ -27,16 +27,16 @@ export default function AdminWelcome({ user, setUser }) {
       <Header user={user} setUser={setUser} />
       <Box sx={{ maxWidth: 600, margin: "50px auto", textAlign: "center" }}>
         <Typography variant="h4" gutterBottom>
-          Välkommen, {user.name}!
+          Welcome, {user.name}!
         </Typography>
         <Typography variant="body1" sx={{ mb: 1 }}>
-          E-post: {user.email}
+          Email: {user.email}
         </Typography>
         <Typography variant="body1" sx={{ mb: 3 }}>
-          Roll: {role}
+          Role: {role}
         </Typography>
         <Button variant="contained" onClick={goToDashboard}>
-          Gå till Dashboard
+          Go to Dashboard
         </Button>
       </Box>
     </div>
